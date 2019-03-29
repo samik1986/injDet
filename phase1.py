@@ -123,7 +123,7 @@ def Injection_Detection_Globalthrd(metadata_path):
     return np.min([otsu_list.mean(), np.median(otsu_list)])
 
 def Injection_Detection_mask(GlobalThrd_G, GlobalThrd_R, img_path):
-    img = imread_fast(img_path)
+    img = cv2.imread(img_path, -1)
     print img_path
     #img = cv2.imread(img_path, -1)
     #img = img - img.min()
@@ -340,7 +340,7 @@ if __name__ == "__main__":
     # os.system('export LD_LIBRARY_PATH=/sonas-hs/mitra/hpc/home/xli/KAKADU/lib/Linux-x86-64-gcc/')
 
     # input_path = sys.argv[1]
-    input_path = '/Users/banerjee/mnt/bnbdev1/nfs/mitraweb2/mnt/disk125/main/mba_converted_imaging_data/PMD3167&3166/PMD3166/'
+    input_path = '/home/samik/mnt/bnb/nfs/mitraweb2/mnt/disk125/main/mba_converted_imaging_data/PMD3167&3166/PMD3166/'
     # save_path = sys.argv[2]
-    save_path = '/Users/banerjee/mnt/bnbdev1/mnt/grid/mitra/hpc/home/data/banerjee/InjDet/'
+    save_path = '/home/samik/mnt/bnb/mnt/grid/mitra/hpc/home/data/banerjee/InjDet/'
     main()
