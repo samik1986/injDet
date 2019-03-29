@@ -61,6 +61,7 @@ def GetBlockList(x, y, overlap=10/2):
 
 def Injection_Detection_thrd(img_path):
     img = cv2.imread(img_path,-1)
+    img = img - img.min()
     print img_path
     #img = cv2.imread(img_path, -1)
     #img = img - img.min()
@@ -78,12 +79,16 @@ def Injection_Detection_thrd(img_path):
     mask_grn = img[:,:,1] < thrd_grn * 5
     thrd_red = left_array_red.mean()
     mask_red = img[:,:,2] < thrd_red * 5
-    
+
+
+
     img_grn[mask_grn] = 0
     img_grn = img_grn.ravel()
     img_grn = img_grn[img_grn != 0]
     otsu_res_grn = threshold_otsu(img_grn, nbins = 4095) * 1.1 #30% increase to deal with image without signal
-    
+
+    print img_path
+
     img_red[mask_red] = 0    
     img_red = img_red.ravel()
     img_red = img_red[img_red != 0]
@@ -109,7 +114,7 @@ def Injection_Detection_thrd(img_path):
     file.write("First Pass otsu thred\r\n")
     file.write(str(otsu_res_red)+'\r\n')
     file.close()
-    
+
     return
 
 def Injection_Detection_Globalthrd(metadata_path):
@@ -307,8 +312,11 @@ def Injection_Detect_Pipeline(PMD_path, color = 'GRN'):
     
     
     print 'Finding local otsu......'
-    p = Pool(8)
-    p.map(Injection_Detection_thrd, img_path_list)
+    # p = Pool(1)
+    # p.map(Injection_Detection_thrd, img_path_list)
+    for img_path in img_path_list:
+        # print img_path
+        Injection_Detection_thrd(img_path)
     
     print 'Finding global otsu......'
     GlobalThrd_G = Injection_Detection_Globalthrd(save_path + '/Metadata_G/')
@@ -316,18 +324,24 @@ def Injection_Detect_Pipeline(PMD_path, color = 'GRN'):
     print GlobalThrd_G
     print GlobalThrd_R
     print 'Applying global otsu......'
-    func = partial(Injection_Detection_mask, GlobalThrd_G, GlobalThrd_R)
-    p.map(func, img_path_list)
-    
+    # func = partial(Injection_Detection_mask, GlobalThrd_G, GlobalThrd_R)
+    # p.map(func, img_path_list)
+    for img_path in img_path_list:
+        Injection_Detection_mask(GlobalThrd_G,GlobalThrd_R,img_path)
+
     print 'Calculate contour/Center of Mass/size'
     
     mask_path_list = natural_sort(glob.glob(save_path + '/Mask_GlobalThrd_G/' + '*.jp2'))
-    p=Pool(8)
-    p.map(Injection_Detection_COM_G, mask_path_list)
-    
+    # p=Pool(8)
+    # p.map(Injection_Detection_COM_G, mask_path_list)
+    for mask_path in mask_path_list:
+        Injection_Detection_COM_G(mask_path)
+
     mask_path_list = natural_sort(glob.glob(save_path + '/Mask_GlobalThrd_R/' + '*.jp2'))
-    p=Pool(8)
-    p.map(Injection_Detection_COM_R, mask_path_list)
+    # p=Pool(8)
+    # p.map(Injection_Detection_COM_R, mask_path_list)
+    for mask_path in mask_path_list:
+        Injection_Detection_COM_R(mask_path)
     
 def main():    
     print strftime("%Y-%m-%d %H:%M:%S", gmtime())
@@ -342,5 +356,5 @@ if __name__ == "__main__":
     # input_path = sys.argv[1]
     input_path = '/home/samik/mnt/bnb/nfs/mitraweb2/mnt/disk125/main/mba_converted_imaging_data/PMD3167&3166/PMD3166/'
     # save_path = sys.argv[2]
-    save_path = '/home/samik/mnt/bnb/mnt/grid/mitra/hpc/home/data/banerjee/InjDet/'
+    save_path = '/home/samik/mnt/bnb/mnt/grid/mitra/hpc/home/data/banerjee/InjDet/PMD3166/'
     main()
