@@ -87,7 +87,7 @@ def Injection_Detection_thrd(img_path):
     img_grn = img_grn[img_grn != 0]
     otsu_res_grn = threshold_otsu(img_grn, nbins = 4095) * 1.1 #30% increase to deal with image without signal
 
-    print img_path
+    # print img_path
 
     img_red[mask_red] = 0    
     img_red = img_red.ravel()
@@ -316,7 +316,10 @@ def Injection_Detect_Pipeline(PMD_path, color = 'GRN'):
     # p.map(Injection_Detection_thrd, img_path_list)
     for img_path in img_path_list:
         # print img_path
-        Injection_Detection_thrd(img_path)
+        try:
+            Injection_Detection_thrd(img_path)
+        except:
+            continue
     
     print 'Finding global otsu......'
     GlobalThrd_G = Injection_Detection_Globalthrd(save_path + '/Metadata_G/')
@@ -327,7 +330,10 @@ def Injection_Detect_Pipeline(PMD_path, color = 'GRN'):
     # func = partial(Injection_Detection_mask, GlobalThrd_G, GlobalThrd_R)
     # p.map(func, img_path_list)
     for img_path in img_path_list:
-        Injection_Detection_mask(GlobalThrd_G,GlobalThrd_R,img_path)
+        try:
+            Injection_Detection_mask(GlobalThrd_G,GlobalThrd_R,img_path)
+        except:
+            continue
 
     print 'Calculate contour/Center of Mass/size'
     
@@ -335,13 +341,20 @@ def Injection_Detect_Pipeline(PMD_path, color = 'GRN'):
     # p=Pool(8)
     # p.map(Injection_Detection_COM_G, mask_path_list)
     for mask_path in mask_path_list:
-        Injection_Detection_COM_G(mask_path)
+        try:
+            print mask_path
+            Injection_Detection_COM_G(mask_path)
+        except:
+            continue
 
     mask_path_list = natural_sort(glob.glob(save_path + '/Mask_GlobalThrd_R/' + '*.jp2'))
     # p=Pool(8)
     # p.map(Injection_Detection_COM_R, mask_path_list)
     for mask_path in mask_path_list:
-        Injection_Detection_COM_R(mask_path)
+        try:
+            Injection_Detection_COM_R(mask_path)
+        except:
+            continue
     
 def main():    
     print strftime("%Y-%m-%d %H:%M:%S", gmtime())

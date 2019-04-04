@@ -31,8 +31,11 @@ def Injection_Detection_FindRange(metadata_path):
     metadata_path_list = natural_sort(glob.glob(metadata_path + '*.txt'))
     size_list = []
     for ii in metadata_path_list:
+        # print ii
         f = open(ii)
         lines = f.readlines()
+        # print lines
+        # size_list.append(lines[1])
         size_list.append(lines[7])
     size_list = np.asarray(size_list, 'float64')
     size_list = size_list > injection_pixel_thrd
@@ -107,58 +110,105 @@ def Injection_Detection_SNAKE_G(img_path):
   
   
 
-    fig, ax = plt.subplots(figsize=(15, 15))
-    ax.imshow(img, cmap=plt.cm.gray)
-    ax.plot(init[:, 0] + CoM_Y - 1000, init[:, 1] + CoM_X - 1000, '--r', lw=1)
+    # fig, ax = plt.subplots(figsize=(15, 15))
+    # ax.imshow(img, cmap=plt.cm.gray)
+    # ax.plot(init[:, 0] + CoM_Y - 1000, init[:, 1] + CoM_X - 1000, '--r', lw=1)
     snake = active_contour(subimg, init, alpha=0.015, beta=1, gamma=0.001, max_iterations=3000)
-    ax.plot(snake[:, 0] + CoM_Y - 1000, snake[:, 1] + CoM_X - 1000, '-b', lw=2)
-    
-    os.system('mkdir '+save_path+'/InjectionSite_SNAKE_G/')
-    plt.savefig(save_path + '/InjectionSite_SNAKE_G/' + basename + '.tif')
-    
-    
-    fig, ax = plt.subplots(figsize=(15, 15))
-    blackimg = np.zeros((img.shape[0],img.shape[1]))
-    ax.imshow(blackimg, cmap=plt.cm.gray)
-    ax.plot(init[:, 0] + CoM_Y - 1000, init[:, 1] + CoM_X - 1000, '--r', lw=1)
-    ax.plot(snake[:, 0] + CoM_Y - 1000, snake[:, 1] + CoM_X - 1000, '-b', lw=1)
-    
-    os.system('mkdir '+save_path+'/InjectionSite_SNAKE_only_G')
-    plt.savefig(save_path + '/InjectionSite_SNAKE_only_G/' + basename + '.tif')
-    
+    # ax.plot(snake[:, 0] + CoM_Y - 1000, snake[:, 1] + CoM_X - 1000, '-b', lw=2)
+
+    # os.system('mkdir '+save_path+'/InjectionSite_SNAKE_G/')
+    # plt.savefig(save_path + '/InjectionSite_SNAKE_G/' + basename + '.tif')
+
+
+    # fig, ax = plt.subplots(figsize=(15, 15))
+    # blackimg = np.zeros((img.shape[0],img.shape[1]))
+    # ax.imshow(blackimg, cmap=plt.cm.gray)
+    # ax.plot(init[:, 0] + CoM_Y - 1000, init[:, 1] + CoM_X - 1000, '--r', lw=1)
+    # ax.plot(snake[:, 0] + CoM_Y - 1000, snake[:, 1] + CoM_X - 1000, '-b', lw=1)
+    #
+    # os.system('mkdir '+save_path+'/InjectionSite_SNAKE_only_G')
+    # plt.savefig(save_path + '/InjectionSite_SNAKE_only_G/' + basename + '.tif')
+    #
     os.system('mkdir '+save_path + '/InjectionSite_SNAKE_datapoints_G')
     init[:, 0] = init[:, 0] + CoM_Y - 1000
     init[:, 1] = init[:, 1] + CoM_X - 1000
     snake[:, 0] = snake[:, 0] + CoM_Y - 1000
     snake[: ,1] = snake[:, 1] + CoM_X - 1000
-    #save the data points
+    # #save the data points
+    # # np.savez_compressed(save_path + '/InjectionSite_SNAKE_datapoints_G/' + basename + '_init_G.npz', init)
+    # # np.savez_compressed(save_path + '/InjectionSite_SNAKE_datapoints_G/' + basename + '_snake_G.npz', snake)
+    # # print 'Saving'
     pickle.dump(init, open(save_path + '/InjectionSite_SNAKE_datapoints_G/' + basename + '_init_G.p','wb'))
     pickle.dump(snake,open(save_path + '/InjectionSite_SNAKE_datapoints_G/' + basename + '_snake_G.p','wb'))
+    print 'Saving Finished'
+    # p = [l for l in locals().keys()]
+    # for l in p:
+    #     del l
+    # p = [l for l in globals().keys()]
+    # for l in p:
+    #     del l
+    # p = [l for l in dir().keys()]
+    # for l in p:
+    #     del l
+    # del init, snake, ax, fig, subimg, img, contour_mask
+    # my_vars = [v for v in locals().keys()]
+    # print my_vars
+    # for v in my_vars:
+    #     del v
+    # print my_vars
 
 
 def Injection_Detect_Pipeline(PMD_path, color = 'GRN'):
     
     ###find the possible list of injection images:
     print 'Finding the interesting images stack - G'
+    # print PMD_path.split('PMD')[-1].split('/')[0]
     mask_path_list = natural_sort(glob.glob(save_path + '/Mask_GlobalThrd_G/' + '*.jp2'))#
-    
     injct_binary = Injection_Detection_FindRange(save_path + '/Metadata_G/')
     #injct_binary = Good_Neighbor(injct_binary)
     length, starting_index = Longest_Sublist(injct_binary)
-    injct_path_list = []  #The list of image will be processed by SNAKE, possible injection site images.
-    for i in range(starting_index, starting_index + length):
-        injct_path_list.append(mask_path_list[i])
-        #print mask_path_list[i]
-    injct_path_list.append(mask_path_list[i + 1])
-    injct_path_list.append(mask_path_list[i + 2])
-    injct_path_list.append(mask_path_list[starting_index - 1])
-    injct_path_list.append(mask_path_list[starting_index - 2])
-    
+    os.system('mkdir ' + save_path + '/InjectionPath_lists/')
+    # print os.path.isfile(save_path + 'InjectionPath_lists/PMD1' + PMD_path.split('PMD')[-1].split('/')[0] + '.npy')
+    if os.path.isfile(save_path + 'InjectionPath_lists/PMD' + PMD_path.split('PMD')[-1].split('/')[0] + '.npy'):
+        print 'Loading'
+        injct_path_list = np.load(save_path + '/InjectionPath_lists/PMD' + PMD_path.split('PMD')[-1].split('/')[0] + '.npy')
+    else:
+        injct_path_list = []  # The list of image will be processed by SNAKE, possible injection site images.
+        for i in range(starting_index, starting_index + length):
+            injct_path_list.append(mask_path_list[i])
+            # print mask_path_list[i]
+        injct_path_list.append(mask_path_list[i + 1])
+        try:
+            injct_path_list.append(mask_path_list[i + 2])
+        except:
+            print i + 2
+        injct_path_list.append(mask_path_list[starting_index - 1])
+        injct_path_list.append(mask_path_list[starting_index - 2])
+
     print 'Watchout for SNAKE! - G'
-    print injct_path_list
+
     #Use SNAKE method to draw the contour
-    p = Pool(4)
-    p.map(Injection_Detection_SNAKE_G, injct_path_list)
+    # p = Pool(4)
+    for injct_path in injct_path_list:
+        try:
+            # print os.path.basename(injct_path).split('_')[1]
+            # print save_path   + '/InjectionPath_lists/' + os.path.basename(injct_path) + '.npy'
+            np.save(save_path + '/InjectionPath_lists/PMD' + PMD_path.split('PMD')[-1].split('/')[0] + '.npy', injct_path_list)
+            # print injct_path_list[0]
+            # print np.type(injct_path_list)
+            # print injct_path_list.pop(1)
+            Injection_Detection_SNAKE_G(injct_path)
+            # print 'OK'
+            injct_path_list1 = np.delete(injct_path_list,0)
+
+            # print injct_path_list1.size
+            injct_path_list = injct_path_list1
+            # index = np.argmax(injct_path_list==injct_path)
+
+            # print injct_path
+            # print save_path # + '/InjectionPath_lists/' + os.path.basename(PMD_path) + '.npy'
+        except:
+            continue
 
 def main():    
     print strftime("%Y-%m-%d %H:%M:%S", gmtime())
@@ -168,9 +218,9 @@ def main():
 
 if __name__ == "__main__":
     injection_pixel_thrd = 400000
-    os.system('export LD_LIBRARY_PATH=/sonas-hs/mitra/hpc/home/xli/KAKADU/lib/Linux-x86-64-gcc/')
-    input_path = sys.argv[1]
-    save_path = sys.argv[2]
+    # os.system('export LD_LIBRARY_PATH=/sonas-hs/mitra/hpc/home/xli/KAKADU/lib/Linux-x86-64-gcc/')
+    input_path = '/home/samik/mnt/bnb/nfs/mitraweb2/mnt/disk125/main/mba_converted_imaging_data/PMD3165&3164/PMD3164/'
+    save_path = '/home/samik/mnt/bnb/mnt/grid/mitra/hpc/home/data/banerjee/InjDet/PMD3164/'
     main()
     
     
