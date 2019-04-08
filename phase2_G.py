@@ -219,8 +219,8 @@ def main():
 if __name__ == "__main__":
     injection_pixel_thrd = 400000
     # os.system('export LD_LIBRARY_PATH=/sonas-hs/mitra/hpc/home/xli/KAKADU/lib/Linux-x86-64-gcc/')
-    input_path = '/home/samik/mnt/bnb/nfs/mitraweb2/mnt/disk125/main/mba_converted_imaging_data/PMD3165&3164/PMD3164/'
-    save_path = '/home/samik/mnt/bnb/mnt/grid/mitra/hpc/home/data/banerjee/InjDet/PMD3164/'
+    input_path = '/home/samik/mnt/bnb/nfs/mitraweb2/mnt/disk125/main/mba_converted_imaging_data/PMD3167&3166/PMD3166/'
+    save_path = '/home/samik/mnt/bnb/mnt/grid/mitra/hpc/home/data/banerjee/InjDet/PMD3166/'
     main()
     
     
